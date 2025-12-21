@@ -77,6 +77,9 @@ with DAG(
         volumes=[config_volume],
         volume_mounts=[config_mount],
         env_from=[secret_env_source],
+
+        is_delete_operator_pod=False,  # <--- QUAN TRỌNG: Không xóa Pod khi chạy xong
+        get_logs=True,
         
         # --- SỬA TẠI ĐÂY (resources -> container_resources) ---
         container_resources=k8s.V1ResourceRequirements(
