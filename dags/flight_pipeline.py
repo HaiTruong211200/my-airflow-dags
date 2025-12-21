@@ -43,10 +43,10 @@ with DAG(
 
     # TASK 1: INGESTION
     ingestion_task = KubernetesPodOperator(
-        task_id='ingest_kafka_to_minio',
+        task_id='ingestion_job',
         name='ingestion-worker',
         namespace='bigdata',
-        image='flight-prediction:v3',
+        image='flight-prediction:v2',
         image_pull_policy='Never',
         cmds=["python", "-m", "src.jobs.ingestion_job"],
         
@@ -67,10 +67,10 @@ with DAG(
 
     # TASK 2: ETL
     etl_task = KubernetesPodOperator(
-        task_id='etl_minio_transformation',
+        task_id='etl_job',
         name='etl-worker',
         namespace='bigdata',
-        image='flight-prediction:v3',
+        image='flight-prediction:v2',
         image_pull_policy='Never',
         cmds=["python", "-m", "src.jobs.etl_job"],
         
