@@ -88,8 +88,7 @@ with DAG(
         ),
         # ------------------------------------------------------
 
-        on_finish_action="delete_pod",
-        get_logs=True
+        on_finish_action="delete_pod"
     )
 
     ingestion_task >> etl_task
