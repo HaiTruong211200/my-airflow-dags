@@ -56,8 +56,8 @@ with DAG(
         
         # --- SỬA TẠI ĐÂY (resources -> container_resources) ---
         container_resources=k8s.V1ResourceRequirements(
-            requests={"memory": "500Mi", "cpu": "500m"},
-            limits={"memory": "1Gi", "cpu": "1000m"}
+            requests={"memory": "1500Mi", "cpu": "1500m"},
+            limits={"memory": "3Gi", "cpu": "2500m"}
         ),
         # ------------------------------------------------------
 
@@ -83,8 +83,8 @@ with DAG(
         
         # --- SỬA TẠI ĐÂY (resources -> container_resources) ---
         container_resources=k8s.V1ResourceRequirements(
-            requests={"memory": "500Mi", "cpu": "500m"},
-            limits={"memory": "1Gi", "cpu": "1000m"}
+            requests={"memory": "2Gi", "cpu": "1500m"},
+            limits={"memory": "4Gi", "cpu": "3000m"}
         ),
         # ------------------------------------------------------
 
