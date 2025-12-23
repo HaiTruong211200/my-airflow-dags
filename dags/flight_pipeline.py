@@ -35,7 +35,7 @@ with DAG(
     'flight_full_pipeline',
     default_args=default_args,
     description='Full Flow: Kafka -> MinIO -> Warehouse',
-    schedule='0 * * * *', 
+    schedule='0 6,18 * * *', 
     start_date=pendulum.today('UTC').add(days=-1),
     catchup=False,
     tags=['production', 'bigdata'],
