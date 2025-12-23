@@ -32,23 +32,22 @@ default_args = {
 }
 
 with DAG(
-    'flight_full_pipeline',
+    'model_training',
     default_args=default_args,
-    description='Full Flow: Kafka -> MinIO -> Warehouse',
-    schedule='0 6,18 * * *', 
+    description='Model Training Job',
+    schedule='@daily', 
     start_date=pendulum.today('UTC').add(days=-1),
     catchup=False,
     tags=['production', 'bigdata'],
 ) as dag:
 
-    # TASK 1: INGESTION
-    ingestion_task = KubernetesPodOperator(
-        task_id='ingestion_job',
-        name='ingestion-worker',
+    model_training_task = KubernetesPodOperator(
+        task_id='model_training',
+        name='model-training-worker',
         namespace='bigdata',
         image='flight-prediction:v2',
         image_pull_policy='Never',
-        cmds=["python", "-m", "src.jobs.ingestion_job"],
+        cmds=["python", "-m", "src.jobs.train_model"],
         
         volumes=[config_volume],
         volume_mounts=[config_mount],
@@ -56,39 +55,11 @@ with DAG(
         
         # --- SỬA TẠI ĐÂY (resources -> container_resources) ---
         container_resources=k8s.V1ResourceRequirements(
-            requests={"memory": "500Mi", "cpu": "500m"},
-            limits={"memory": "1Gi", "cpu": "1000m"}
+            requests={"memory": "4Gi", "cpu": "1"},
+            limits={"memory": "6Gi", "cpu": "2"}
         ),
         # ------------------------------------------------------
 
-        on_finish_action="delete_pod", 
-        get_logs=True
-    )
-
-    # TASK 2: ETL
-    etl_task = KubernetesPodOperator(
-        task_id='etl_job',
-        name='etl-worker',
-        namespace='bigdata',
-        image='flight-prediction:v2',
-        image_pull_policy='Never',
-        cmds=["python", "-m", "src.jobs.etl_job"],
-        
-        volumes=[config_volume],
-        volume_mounts=[config_mount],
-        env_from=[secret_env_source],
-
-        is_delete_operator_pod=False,  # <--- QUAN TRỌNG: Không xóa Pod khi chạy xong
         get_logs=True,
-        
-        # --- SỬA TẠI ĐÂY (resources -> container_resources) ---
-        container_resources=k8s.V1ResourceRequirements(
-            requests={"memory": "500Mi", "cpu": "500m"},
-            limits={"memory": "1Gi", "cpu": "1000m"}
-        ),
-        # ------------------------------------------------------
-
-        # on_finish_action="delete_pod"
+        is_delete_operator_pod=True
     )
-
-    ingestion_task >> etl_task
