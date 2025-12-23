@@ -91,4 +91,28 @@ with DAG(
         # on_finish_action="delete_pod"
     )
 
-    ingestion_task >> etl_task
+    # TASK 3: MODEL TRAINING
+    model_training_task = KubernetesPodOperator(
+        task_id='model_training',
+        name='model-training-worker',
+        namespace='bigdata',
+        image='flight-prediction:v2',
+        image_pull_policy='Never',
+        cmds=["python", "-m", "src.jobs.train_model"],
+        
+        volumes=[config_volume],
+        volume_mounts=[config_mount],
+        env_from=[secret_env_source],
+        
+        # --- SỬA TẠI ĐÂY (resources -> container_resources) ---
+        container_resources=k8s.V1ResourceRequirements(
+            requests={"memory": "8Gi", "cpu": "2"},
+            limits={"memory": "16Gi", "cpu": "3"}
+        ),
+        # ------------------------------------------------------
+
+        get_logs=True,
+        is_delete_operator_pod=True
+    )
+
+    ingestion_task >> etl_task >> model_training_task
